@@ -10499,30 +10499,29 @@ var Card;
 Card = (function(){
   Card.displayName = 'Card';
   var prototype = Card.prototype, constructor = Card;
-  Card.$card_divs = function(){
-    return $(".list-card");
+  Card.instances = [];
+  Card.is_initialized = false;
+  Card.selector = ".list-card";
+  Card.current = null;
+  Card.initialize = function(){
+    return this.listen();
   };
-  Card.all = function(){
-    return map(function(it){
-      return new constructor(it);
-    })(
-    this.$card_divs());
+  Card.listen = function(){
+    var this$ = this;
+    $(document).on("mouseover", this.selector, function(arg$){
+      var target;
+      target = arg$.target;
+      return this$.current = new constructor($(target).parents().filter(this$.selector)[0]);
+    });
+    return Main.on_keydown("i", function(){
+      var ref$;
+      return (ref$ = this$.current) != null ? ref$.yank() : void 8;
+    });
   };
-  Card.current = {};
   function Card(elm){
     this.$elm = $(elm);
-    this.initialize();
+    this.instances;
   }
-  Object.defineProperty(prototype, '$badges_div', {
-    get: function(){
-      var ref$;
-      return (ref$ = this._$badges_div) != null
-        ? ref$
-        : this._$badges_div = this.$elm.find(".list-card-members");
-    },
-    configurable: true,
-    enumerable: true
-  });
   Object.defineProperty(prototype, '$dummy_textarea', {
     get: function(){
       var ref$;
@@ -10570,26 +10569,14 @@ Card = (function(){
     configurable: true,
     enumerable: true
   });
-  prototype.initialize = function(){
-    return this.listen();
-  };
-  prototype.listen = function(){
-    var this$ = this;
-    this.$elm.on("mouseover", function(){
-      return this$['class'].current = this$;
-    });
-    return Main.on_keydown("i", function(){
-      if (this$.is_current) {
-        return this$.yank();
-      }
-    });
-  };
-  prototype.add_copy_anchor = function(){
-    return this.$badges_div.append(this.$copy_anchor);
-  };
   prototype.yank = function(){
+    var this$ = this;
     this.$dummy_textarea.appendTo($("body")).text(this.id).select();
-    return document.execCommand("copy");
+    document.execCommand("copy");
+    this.$elm.addClass("copied");
+    return setTimeout(function(){
+      return this$.$elm.removeClass("copied");
+    }, 300);
   };
   return Card;
 }());
@@ -10599,10 +10586,10 @@ Main = {
     return Card.all();
   },
   execute: function(){
-    return each(function(it){
-      return it.add_copy_anchor();
-    })(
-    this.cards);
+    return this.initialize();
+  },
+  initialize: function(){
+    return Card.initialize();
   },
   on_keydown: function(key, cb){
     var this$ = this;

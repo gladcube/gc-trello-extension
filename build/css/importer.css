@@ -1,0 +1,6 @@
+.list-card {
+  transition: all 0.4s ease-in-out;
+}
+.list-card.active-card.copied {
+  background: #000;
+}
