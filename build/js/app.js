@@ -10495,29 +10495,6 @@ function curry$(f, bound){
 },{"./Func.js":1,"./List.js":2,"./Num.js":3,"./Obj.js":4,"./Str.js":5}],"prelude-ls":[function(require,module,exports){
 module.exports=require('bcmc1g');
 },{}]},{},[])
-var Main;
-Main = {
-  get cards(){
-    return Card.all();
-  },
-  execute: function(){
-    return each(function(it){
-      return it.add_copy_anchor();
-    })(
-    this.cards);
-  },
-  on_keydown: function(key, cb){
-    var this$ = this;
-    return $(document).on("keydown", function(){
-      if (event.keyCode === KEY_CODES[key]) {
-        return cb();
-      }
-    });
-  }
-};
-$(document).on("ready", function(){
-  return Main.execute();
-});
 var Card;
 Card = (function(){
   Card.displayName = 'Card';
@@ -10616,6 +10593,29 @@ Card = (function(){
   };
   return Card;
 }());
+var Main;
+Main = {
+  get cards(){
+    return Card.all();
+  },
+  execute: function(){
+    return each(function(it){
+      return it.add_copy_anchor();
+    })(
+    this.cards);
+  },
+  on_keydown: function(key, cb){
+    var this$ = this;
+    return $(document).on("keydown", function(){
+      if (event.keyCode === KEY_CODES[key]) {
+        return cb();
+      }
+    });
+  }
+};
+$(document).on("ready", function(){
+  return Main.execute();
+});
 var KEY_CODES;
 KEY_CODES = {
   "a": 65,
