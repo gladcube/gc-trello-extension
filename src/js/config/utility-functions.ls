@@ -1,0 +1,1 @@
+arrayify = (obj)-> Array::slice.call obj, 0

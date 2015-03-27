@@ -10495,11 +10495,59 @@ function curry$(f, bound){
 },{"./Func.js":1,"./List.js":2,"./Num.js":3,"./Obj.js":4,"./Str.js":5}],"prelude-ls":[function(require,module,exports){
 module.exports=require('bcmc1g');
 },{}]},{},[])
+import$(window, require("prelude-ls"));
+function import$(obj, src){
+  var own = {}.hasOwnProperty;
+  for (var key in src) if (own.call(src, key)) obj[key] = src[key];
+  return obj;
+}
+var arrayify;
+arrayify = function(obj){
+  return Array.prototype.slice.call(obj, 0);
+};
+var KEY_CODES;
+KEY_CODES = {
+  a: 65,
+  b: 66,
+  c: 67,
+  d: 68,
+  e: 69,
+  f: 70,
+  g: 71,
+  h: 72,
+  i: 73,
+  j: 74,
+  k: 75,
+  l: 76,
+  m: 77,
+  n: 78,
+  o: 79,
+  p: 80,
+  q: 81,
+  r: 82,
+  s: 83,
+  t: 84,
+  u: 85,
+  v: 86,
+  w: 87,
+  x: 88,
+  y: 89,
+  z: 90
+};
+var LABEL_ORDERS;
+LABEL_ORDERS = {
+  green: 0,
+  yellow: 1,
+  orange: 2,
+  red: 3,
+  purple: 4,
+  blue: 5,
+  sky: 6
+};
 var Card;
 Card = (function(){
   Card.displayName = 'Card';
   var prototype = Card.prototype, constructor = Card;
-  Card.instances = [];
   Card.is_initialized = false;
   Card.selector = ".list-card";
   Card.current = null;
@@ -10518,9 +10566,17 @@ Card = (function(){
       return (ref$ = this$.current) != null ? ref$.yank() : void 8;
     });
   };
+  Card.$card_divs = function(){
+    return $(this.selector);
+  };
+  Card.all = function(){
+    return map(function(it){
+      return new constructor(it);
+    })(
+    this.$card_divs());
+  };
   function Card(elm){
     this.$elm = $(elm);
-    this.instances;
   }
   Object.defineProperty(prototype, '$dummy_textarea', {
     get: function(){
@@ -10541,6 +10597,16 @@ Card = (function(){
       return (ref$ = this._$title_anchor) != null
         ? ref$
         : this._$title_anchor = this.$elm.find("a.list-card-title");
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, '$list', {
+    get: function(){
+      var ref$;
+      return (ref$ = this._$list) != null
+        ? ref$
+        : this._$list = this.$elm.parent().filter(".list-cards");
     },
     configurable: true,
     enumerable: true
@@ -10569,6 +10635,28 @@ Card = (function(){
     configurable: true,
     enumerable: true
   });
+  Object.defineProperty(prototype, 'label_color', {
+    get: function(){
+      var ref$;
+      return (ref$ = head(
+      compact(
+      map(function(it){
+        return it.match(/card-label-(\w+)/);
+      })(
+      split(" ")(
+      this.$elm.find(".card-label").attr("class") || ""))))) != null ? ref$[1] : void 8;
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'label_order', {
+    get: function(){
+      var ref$;
+      return (ref$ = LABEL_ORDERS[this.label_color]) != null ? ref$ : 99;
+    },
+    configurable: true,
+    enumerable: true
+  });
   prototype.yank = function(){
     var this$ = this;
     this.$dummy_textarea.appendTo($("body")).text(this.id).select();
@@ -10580,6 +10668,73 @@ Card = (function(){
   };
   return Card;
 }());
+var List;
+List = (function(){
+  List.displayName = 'List';
+  var prototype = List.prototype, constructor = List;
+  List.is_initialized = false;
+  List.selector = ".list-cards";
+  List.reverse = false;
+  List.initialize = function(){
+    this.sort();
+    return this.listen();
+  };
+  List.listen = function(){
+    var this$ = this;
+    return Main.on_keydown("o", function(){
+      return this$.sort();
+    });
+  };
+  List.$list_divs = function(){
+    return $(this.selector);
+  };
+  List.all = function(){
+    return map(function(it){
+      return new constructor(it);
+    })(
+    this.$list_divs());
+  };
+  List.sort = function(){
+    var this$ = this;
+    each(function(it){
+      return it.sort({
+        reverse: this$.reverse
+      });
+    })(
+    this.all());
+    return this.reverse = !this.reverse;
+  };
+  function List(elm){
+    this.$elm = $(elm);
+  }
+  Object.defineProperty(prototype, 'id', {
+    get: function(){
+      var ref$;
+      return (ref$ = this._id) != null
+        ? ref$
+        : this._id = this.$title_anchor.attr("href").match(/\/c\/([^/]+)\//)[1];
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'class', {
+    get: function(){
+      return this.constructor;
+    },
+    configurable: true,
+    enumerable: true
+  });
+  prototype.sort = function(arg$){
+    var reverse;
+    reverse = arg$.reverse;
+    return this.$elm.html(sortBy(function(it){
+      return new Card(it).label_order * (reverse ? -1 : 1);
+    })(
+    arrayify(
+    this.$elm.children())));
+  };
+  return List;
+}());
 var Main;
 Main = {
   get cards(){
@@ -10589,7 +10744,8 @@ Main = {
     return this.initialize();
   },
   initialize: function(){
-    return Card.initialize();
+    Card.initialize();
+    return List.initialize();
   },
   on_keydown: function(key, cb){
     var this$ = this;
@@ -10603,19 +10759,3 @@ Main = {
 $(document).on("ready", function(){
   return Main.execute();
 });
-var KEY_CODES;
-KEY_CODES = {
-  "a": 65,
-  "i": 73,
-  "y": 89
-};
-var a;
-a = function(){
-  return "hoge";
-};
-import$(window, require("prelude-ls"));
-function import$(obj, src){
-  var own = {}.hasOwnProperty;
-  for (var key in src) if (own.call(src, key)) obj[key] = src[key];
-  return obj;
-}
