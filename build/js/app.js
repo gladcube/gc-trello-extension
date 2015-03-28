@@ -10674,15 +10674,20 @@ List = (function(){
   var prototype = List.prototype, constructor = List;
   List.is_initialized = false;
   List.selector = ".list-cards";
-  List.reverse = false;
+  List.current = null;
   List.initialize = function(){
-    this.sort();
     return this.listen();
   };
   List.listen = function(){
     var this$ = this;
+    $(document).on("mouseover", this.selector, function(arg$){
+      var target;
+      target = arg$.target;
+      return this$.current = new constructor($(target).parents().filter(this$.selector)[0]);
+    });
     return Main.on_keydown("o", function(){
-      return this$.sort();
+      var ref$;
+      return (ref$ = this$.current) != null ? ref$.sort() : void 8;
     });
   };
   List.$list_divs = function(){
@@ -10694,19 +10699,16 @@ List = (function(){
     })(
     this.$list_divs());
   };
-  List.sort = function(){
-    var this$ = this;
-    each(function(it){
-      return it.sort({
-        reverse: this$.reverse
-      });
-    })(
-    this.all());
-    return this.reverse = !this.reverse;
-  };
   function List(elm){
     this.$elm = $(elm);
   }
+  Object.defineProperty(prototype, 'reverse', {
+    get: function(){
+      return this.$elm.hasClass("reverse");
+    },
+    configurable: true,
+    enumerable: true
+  });
   Object.defineProperty(prototype, 'id', {
     get: function(){
       var ref$;
@@ -10724,14 +10726,18 @@ List = (function(){
     configurable: true,
     enumerable: true
   });
-  prototype.sort = function(arg$){
-    var reverse;
-    reverse = arg$.reverse;
-    return this.$elm.html(sortBy(function(it){
-      return new Card(it).label_order * (reverse ? -1 : 1);
+  prototype.sort = function(){
+    var this$ = this;
+    this.$elm.html(sortBy(function(it){
+      return new Card(it).label_order * (this$.reverse ? -1 : 1);
     })(
     arrayify(
     this.$elm.children())));
+    if (this.reverse) {
+      return this.$elm.removeClass("reverse");
+    } else {
+      return this.$elm.addClass("reverse");
+    }
   };
   return List;
 }());
