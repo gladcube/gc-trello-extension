@@ -10561,6 +10561,9 @@ Card = (function(){
       target = arg$.target;
       return this$.current = new constructor($(target).parents().filter(this$.selector)[0]);
     });
+    $(document).on("mouseleave", this.selector, function(){
+      return this$.current = null;
+    });
     return Main.on_keydown("i", function(){
       var ref$;
       return (ref$ = this$.current) != null ? ref$.yank() : void 8;
