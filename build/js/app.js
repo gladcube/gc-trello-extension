@@ -10561,12 +10561,11 @@ Card = (function(){
       target = arg$.target;
       return this$.current = new constructor($(target).parents().filter(this$.selector)[0]);
     });
-    $(document).on("mouseleave", this.selector, function(){
-      return this$.current = null;
-    });
     return Main.on_keydown("i", function(){
       var ref$;
-      return (ref$ = this$.current) != null ? ref$.yank() : void 8;
+      if (event.target.tagName !== "TEXTAREA") {
+        return (ref$ = this$.current) != null ? ref$.yank() : void 8;
+      }
     });
   };
   Card.$card_divs = function(){
@@ -10690,7 +10689,9 @@ List = (function(){
     });
     return Main.on_keydown("o", function(){
       var ref$;
-      return (ref$ = this$.current) != null ? ref$.sort() : void 8;
+      if (event.target.tagName !== "TEXTAREA") {
+        return (ref$ = this$.current) != null ? ref$.sort() : void 8;
+      }
     });
   };
   List.$list_divs = function(){

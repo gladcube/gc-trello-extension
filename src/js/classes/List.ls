@@ -6,7 +6,8 @@ class List
   @listen = ->
     $ document .on "mouseover", @selector, ({target})~>
       @current = new @@ ($ target .parents!.filter @selector).0
-    Main.on_keydown "o", ~> @current?.sort!
+    Main.on_keydown "o", ~>
+      @current?.sort! unless event.target.tag-name is "TEXTAREA"
   @$list_divs = -> $ @selector
   @all = -> @$list_divs! |> map -> new @@ it
   # @sort = ->
