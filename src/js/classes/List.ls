@@ -34,7 +34,7 @@ class List
   style:~ ->
     background: @background
     opacity: @opacity
-  background:~ -> switch (@type |> trim)
+  background:~ -> switch (if @type? then @type |> trim)
     | \Idea => \#dff
     | \Plan => \#ddf
     | \DoingInAdvance => \#dfd
