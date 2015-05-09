@@ -26,7 +26,7 @@ class List
   $cards_container:~ -> @_$cards_container ?= @$elm.find ".list-cards"
   $list_header_name:~ -> @_$list_header_name ?= @$elm.find ".list-header-name"
   title:~ -> @$list_header_name.text!
-  type:~ -> @_type ?= if @title.match /\(([^)]+)\)/ then that.1 |> trim
+  type:~ -> @_type ?= if @title.match /\(([^)]+)\)/ then that.1
   period:~ -> @_period ?= if @title.match /<([^>]+)>/ then that.1
   time_resource:~ -> @_time_resource ?= if @title.match /\[([^\]]+)\]/ then that.1
   is_reverse:~ -> @$elm.has-class "reverse"
@@ -34,7 +34,7 @@ class List
   style:~ ->
     background: @background
     opacity: @opacity
-  background:~ -> switch @type
+  background:~ -> switch (@type |> trim)
     | \Idea => \#dff
     | \Plan => \#ddf
     | \DoingInAdvance => \#dfd

@@ -10846,8 +10846,7 @@ List = (function(){
       var ref$, that;
       return (ref$ = this._type) != null
         ? ref$
-        : this._type = (that = this.title.match(/\(([^)]+)\)/)) ? trim(
-        that[1]) : void 8;
+        : this._type = (that = this.title.match(/\(([^)]+)\)/)) ? that[1] : void 8;
     },
     configurable: true,
     enumerable: true
@@ -10898,7 +10897,8 @@ List = (function(){
   });
   Object.defineProperty(prototype, 'background', {
     get: function(){
-      switch (this.type) {
+      switch (trim(
+      this.type)) {
       case 'Idea':
         return '#dff';
       case 'Plan':
