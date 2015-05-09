@@ -9,5 +9,3 @@ Main =
     $(document).on "keydown", ~> if event.key-code is KEY_CODES.(key) then cb!
 
 $(document).on "ready", -> Main.execute!
-
-

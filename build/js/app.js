@@ -10501,9 +10501,12 @@ function import$(obj, src){
   for (var key in src) if (own.call(src, key)) obj[key] = src[key];
   return obj;
 }
-var arrayify;
+var arrayify, trim;
 arrayify = function(obj){
   return Array.prototype.slice.call(obj, 0);
+};
+trim = function(str){
+  return str.replace(/\s/g, "");
 };
 var KEY_CODES;
 KEY_CODES = {
@@ -10544,6 +10547,64 @@ LABEL_ORDERS = {
   blue: 5,
   sky: 6
 };
+var Board;
+Board = (function(){
+  Board.displayName = 'Board';
+  var prototype = Board.prototype, constructor = Board;
+  Board.selector = "#board";
+  Board.instance = function(){
+    var ref$;
+    return (ref$ = this._instance) != null
+      ? ref$
+      : this._instance = new constructor;
+  };
+  function Board(){}
+  Object.defineProperty(prototype, '$elm', {
+    get: function(){
+      var $elm;
+      return this._$elm = ($elm = $(constructor.selector)).length > 0 ? $elm : void 8;
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'elm', {
+    get: function(){
+      var ref$;
+      return (ref$ = this.$elm) != null ? ref$[0] : void 8;
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'is_scrum', {
+    get: function(){
+      return any(function(it){
+        var ref$;
+        return (ref$ = it.type) === 'Idea' || ref$ === 'Plan' || ref$ === 'Current' || ref$ === 'Doing' || ref$ === 'Done';
+      })(
+      lists);
+    },
+    configurable: true,
+    enumerable: true
+  });
+  prototype.observe = function(ops, cb){
+    var this$ = this;
+    if (this.elm != null) {
+      return new MutationObserver(cb).observe(this.elm, ops);
+    } else {
+      return setTimeout(function(){
+        return this$.observe(ops, cb);
+      }, 100);
+    }
+  };
+  return Board;
+}());
+Object.defineProperty(window, 'board', {
+  get: function(){
+    return Board.instance();
+  },
+  configurable: true,
+  enumerable: true
+});
 var Card;
 Card = (function(){
   Card.displayName = 'Card';
@@ -10663,6 +10724,7 @@ Card = (function(){
     var this$ = this;
     this.$dummy_textarea.appendTo($("body")).text(this.id).select();
     document.execCommand("copy");
+    this.$dummy_textarea.blur();
     this.$elm.addClass("copied");
     return setTimeout(function(){
       return this$.$elm.removeClass("copied");
@@ -10674,18 +10736,45 @@ var List;
 List = (function(){
   List.displayName = 'List';
   var prototype = List.prototype, constructor = List;
-  List.is_initialized = false;
-  List.selector = ".list-cards";
-  List.current = null;
+  List.selector = "div.list:not(.mod-add)";
+  List.instanciate = function(){
+    return each(function(it){
+      return new constructor(it);
+    })(
+    $(document).find(this.selector));
+  };
   List.initialize = function(){
+    this.instanciate();
+    this.be_observed();
     return this.listen();
+  };
+  List.be_observed = function(){
+    var this$ = this;
+    return board.observe({
+      childList: true
+    }, function(mutations){
+      return each(function(it){
+        return new constructor(it);
+      })(
+      flatten(
+      map(function(it){
+        return filter(function(it){
+          return it.className === "list";
+        })(
+        it.addedNodes);
+      })(
+      mutations)));
+    });
   };
   List.listen = function(){
     var this$ = this;
     $(document).on("mouseover", this.selector, function(arg$){
       var target;
       target = arg$.target;
-      return this$.current = new constructor($(target).parents().filter(this$.selector)[0]);
+      return this$.current = find(function(it){
+        return $(target).parents().filter(constructor.selector)[0] === it.elm;
+      })(
+      this$.instances);
     });
     return Main.on_keydown("o", function(){
       var ref$;
@@ -10694,31 +10783,98 @@ List = (function(){
       }
     });
   };
-  List.$list_divs = function(){
-    return $(this.selector);
-  };
-  List.all = function(){
-    return map(function(it){
-      return new constructor(it);
-    })(
-    this.$list_divs());
-  };
   function List(elm){
-    this.$elm = $(elm);
+    this.elm = elm;
+    if (!this.already_exists) {
+      this.participate();
+    }
+    this.set_style();
+    if (board.is_scrum) {
+      this.format_header();
+    }
+    this.watch();
   }
-  Object.defineProperty(prototype, 'reverse', {
+  Object.defineProperty(prototype, 'already_exists', {
     get: function(){
-      return this.$elm.hasClass("reverse");
+      var ref$;
+      return ((ref$ = constructor.elms_instances_map) != null
+        ? ref$
+        : constructor.elms_instances_map = new WeakMap).get(this.elm) != null;
     },
     configurable: true,
     enumerable: true
   });
-  Object.defineProperty(prototype, 'id', {
+  Object.defineProperty(prototype, '$elm', {
     get: function(){
       var ref$;
-      return (ref$ = this._id) != null
+      return (ref$ = this._$elm) != null
         ? ref$
-        : this._id = this.$title_anchor.attr("href").match(/\/c\/([^/]+)\//)[1];
+        : this._$elm = $(this.elm);
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, '$cards_container', {
+    get: function(){
+      var ref$;
+      return (ref$ = this._$cards_container) != null
+        ? ref$
+        : this._$cards_container = this.$elm.find(".list-cards");
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, '$list_header_name', {
+    get: function(){
+      var ref$;
+      return (ref$ = this._$list_header_name) != null
+        ? ref$
+        : this._$list_header_name = this.$elm.find(".list-header-name");
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'title', {
+    get: function(){
+      return this.$list_header_name.text();
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'type', {
+    get: function(){
+      var ref$, that;
+      return (ref$ = this._type) != null
+        ? ref$
+        : this._type = (that = this.title.match(/\(([^)]+)\)/)) ? trim(
+        that[1]) : void 8;
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'period', {
+    get: function(){
+      var ref$, that;
+      return (ref$ = this._period) != null
+        ? ref$
+        : this._period = (that = this.title.match(/<([^>]+)>/)) ? that[1] : void 8;
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'time_resource', {
+    get: function(){
+      var ref$, that;
+      return (ref$ = this._time_resource) != null
+        ? ref$
+        : this._time_resource = (that = this.title.match(/\[([^\]]+)\]/)) ? that[1] : void 8;
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'is_reverse', {
+    get: function(){
+      return this.$elm.hasClass("reverse");
     },
     configurable: true,
     enumerable: true
@@ -10730,20 +10886,134 @@ List = (function(){
     configurable: true,
     enumerable: true
   });
+  Object.defineProperty(prototype, 'style', {
+    get: function(){
+      return {
+        background: this.background,
+        opacity: this.opacity
+      };
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'background', {
+    get: function(){
+      switch (this.type) {
+      case 'Idea':
+        return '#dff';
+      case 'Plan':
+        return '#ddf';
+      case 'DoingInAdvance':
+        return '#dfd';
+      case 'Current':
+        return '#ffd';
+      case 'Doing':
+        return '#fdd';
+      default:
+        return "";
+      }
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'opacity', {
+    get: function(){
+      switch (this.type) {
+      case 'Done':
+        return 0.8;
+      default:
+        return 1;
+      }
+    },
+    configurable: true,
+    enumerable: true
+  });
+  Object.defineProperty(prototype, 'is_formatted_header', {
+    get: function(){
+      return this.$list_header_name.html().match(/<br>/) || function(it){
+        return it.length === 1;
+      }(
+      compact(
+      [this.type, this.period, this.time_resource]));
+    },
+    configurable: true,
+    enumerable: true
+  });
+  prototype.participate = function(){
+    var ref$;
+    (constructor.instances || (constructor.instances = [])).push(this);
+    return ((ref$ = constructor.elms_instances_map) != null
+      ? ref$
+      : constructor.elms_instances_map = new WeakMap).set(this.elm, this);
+  };
+  prototype.watch = function(){
+    var this$ = this;
+    return this.observe_elm(this.$list_header_name[0], {
+      childList: true
+    }, function(){
+      if (!this$.is_formatted_header) {
+        this$.clear_caches();
+      }
+      this$.set_style();
+      if (!this$.is_formatted_header && board.is_scrum) {
+        return this$.format_header();
+      }
+    });
+  };
+  prototype.observe_elm = function(elm, ops, cb){
+    return new MutationObserver(cb).observe(elm, ops);
+  };
   prototype.sort = function(){
     var this$ = this;
-    this.$elm.html(sortBy(function(it){
-      return new Card(it).label_order * (this$.reverse ? -1 : 1);
+    this.$cards_container.html(sortBy(function(it){
+      return new Card(it).label_order * (this$.is_reverse ? -1 : 1);
     })(
     arrayify(
-    this.$elm.children())));
-    if (this.reverse) {
+    this.$cards_container.children())));
+    if (this.is_reverse) {
       return this.$elm.removeClass("reverse");
     } else {
       return this.$elm.addClass("reverse");
     }
   };
+  prototype.set_style = function(){
+    return this.$elm.css(this.style);
+  };
+  prototype.format_header = function(){
+    return this.$list_header_name.html(join("<br>")(
+    compact(
+    [this.type, this.period, this.time_resource])));
+  };
+  prototype.clear_caches = function(){
+    var this$ = this;
+    return each(function(it){
+      var ref$;
+      return ref$ = this$[it], delete this$[it], ref$;
+    })(
+    filter(function(it){
+      return it.charAt(0) === "_";
+    })(
+    keys(
+    this)));
+  };
   return List;
+}());
+Object.defineProperty(window, 'lists', {
+  get: function(){
+    return List.instances;
+  },
+  configurable: true,
+  enumerable: true
+});
+var Tab;
+Tab = (function(){
+  Tab.displayName = 'Tab';
+  var prototype = Tab.prototype, constructor = Tab;
+  Tab.current = function(){
+    return chrome.tabs.getCurrent();
+  };
+  function Tab(){}
+  return Tab;
 }());
 var Main;
 Main = {

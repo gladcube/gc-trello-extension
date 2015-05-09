@@ -22,9 +22,8 @@ class Card
     ((@$elm.find(".card-label").attr("class") or "") |> split " " |> map ( .match /card-label-(\w+)/) |> compact |> head)?.1
   label_order:~ ->
     LABEL_ORDERS.(@label_color) ? 99
-  yank: -> 
+  yank: ->
     @$dummy_textarea.append-to($("body")).text @id .select!
     document.exec-command "copy"
+    @$dummy_textarea.blur!
     @$elm.add-class "copied"; set-timeout (~> @$elm.remove-class "copied"), 300
-    
-
