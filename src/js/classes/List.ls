@@ -1,6 +1,8 @@
 class List
   @selector = "div.list:not(.mod-add)"
-  @instanciate = -> $ document .find @selector |> each -> new @@ it
+  @instanciate = ->
+    if ($lists = $ document .find @selector).length > 0 then $lists |> each -> new @@ it
+    else if (@count_of_trying_instantiation ?= 0) < 10 then @count_of_trying_instantiation++; set-timeout (~> @instanciate!), 500
   @initialize = ->
     @instanciate!
     @be_observed!

@@ -10495,6 +10495,19 @@ function curry$(f, bound){
 },{"./Func.js":1,"./List.js":2,"./Num.js":3,"./Obj.js":4,"./Str.js":5}],"prelude-ls":[function(require,module,exports){
 module.exports=require('bcmc1g');
 },{}]},{},[])
+import$(window, require("prelude-ls"));
+function import$(obj, src){
+  var own = {}.hasOwnProperty;
+  for (var key in src) if (own.call(src, key)) obj[key] = src[key];
+  return obj;
+}
+var arrayify, trim;
+arrayify = function(obj){
+  return Array.prototype.slice.call(obj, 0);
+};
+trim = function(str){
+  return str.replace(/\s/g, "");
+};
 var KEY_CODES;
 KEY_CODES = {
   a: 65,
@@ -10533,19 +10546,6 @@ LABEL_ORDERS = {
   purple: 4,
   blue: 5,
   sky: 6
-};
-import$(window, require("prelude-ls"));
-function import$(obj, src){
-  var own = {}.hasOwnProperty;
-  for (var key in src) if (own.call(src, key)) obj[key] = src[key];
-  return obj;
-}
-var arrayify, trim;
-arrayify = function(obj){
-  return Array.prototype.slice.call(obj, 0);
-};
-trim = function(str){
-  return str.replace(/\s/g, "");
 };
 var Board;
 Board = (function(){
@@ -10738,10 +10738,20 @@ List = (function(){
   var prototype = List.prototype, constructor = List;
   List.selector = "div.list:not(.mod-add)";
   List.instanciate = function(){
-    return each(function(it){
-      return new constructor(it);
-    })(
-    $(document).find(this.selector));
+    var $lists, ref$, this$ = this;
+    if (($lists = $(document).find(this.selector)).length > 0) {
+      return each(function(it){
+        return new constructor(it);
+      })(
+      $lists);
+    } else if (((ref$ = this.count_of_trying_instantiation) != null
+      ? ref$
+      : this.count_of_trying_instantiation = 0) < 10) {
+      this.count_of_trying_instantiation++;
+      return setTimeout(function(){
+        return this$.instanciate();
+      }, 500);
+    }
   };
   List.initialize = function(){
     this.instanciate();
