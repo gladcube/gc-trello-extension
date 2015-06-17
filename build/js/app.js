@@ -10624,7 +10624,7 @@ Card = (function(){
     });
     return Main.on_keydown("i", function(){
       var ref$;
-      if (event.target.tagName !== "TEXTAREA") {
+      if ((ref$ = event.target.tagName) !== 'TEXTAREA' && ref$ !== 'INPUT') {
         return (ref$ = this$.current) != null ? ref$.yank() : void 8;
       }
     });

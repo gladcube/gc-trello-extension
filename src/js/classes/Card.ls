@@ -7,7 +7,7 @@ class Card
     $ document .on "mouseover", @selector, ({target})~>
       @current = new @@ ($ target .parents!.filter @selector).0
     Main.on_keydown "i", ~>
-      @current?.yank! unless event.target.tag-name is "TEXTAREA"
+      @current?.yank! unless event.target.tag-name in <[TEXTAREA INPUT]>
   @$card_divs = -> $ @selector
   @all = -> @$card_divs! |> map -> new @@ it
   (elm)->
