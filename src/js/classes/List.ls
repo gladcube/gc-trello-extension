@@ -2,24 +2,25 @@ class List
   @selector = "div.list:not(.mod-add)"
   @instanciate = ->
     if ($lists = $ document .find @selector).length > 0 then $lists |> each -> new @@ it
-    else if (@count_of_trying_instantiation ?= 0) < 10 then @count_of_trying_instantiation++; set-timeout (~> @instanciate!), 500
+    else set-timeout (~> @instanciate!), 500
   @initialize = ->
     @instanciate!
-    @be_observed!
     @listen!
-  @be_observed = ->
-    board.observe (child-list: yes), (mutations)~>
-      mutations
-      |> map ( .added-nodes |> filter ( .class-name is "list"))
-      |> flatten
-      |> each ~> new @@ it
+    #@be_observed!
+#  @be_observed = ->
+#    board.observe (child-list: yes), (mutations)~>
+#      mutations
+#      |> map ( .added-nodes |> filter ( .class-name is "list"))
+#      |> flatten
+#      |> each ~> new @@ it
   @listen = ->
     $ document .on "mouseover", @selector, ({target})~>
       @current = @instances |> find -> ($ target .parents!.filter @@selector .0) is it.elm
     Main.on_keydown "o", ~>
       @current?.sort! unless event.target.tag-name is "TEXTAREA"
   (@elm)->
-    @participate! if not @already_exists # リストエレメントの数だけしか存在しないように
+    if @already_exists then return # リストエレメントの数だけしか存在しないように
+    @participate!
     @set_style!
     @format_header! if board.is_scrum
     @watch!

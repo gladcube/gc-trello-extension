@@ -9,5 +9,5 @@
    "manifest_version": 2,
    "name": "GC Trello Extension",
    "permissions": [ "storage", "clipboardWrite", "tabs" ],
-   "version": "1.0.3"
+   "version": "1.0.4"
 }

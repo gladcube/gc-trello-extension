@@ -10552,11 +10552,11 @@ Board = (function(){
   Board.displayName = 'Board';
   var prototype = Board.prototype, constructor = Board;
   Board.selector = "#board";
-  Board.instance = function(){
-    var ref$;
-    return (ref$ = this._instance) != null
-      ? ref$
-      : this._instance = new constructor;
+  Board.initialize = function(){
+    return this.instanciate();
+  };
+  Board.instanciate = function(){
+    return this._instance = new constructor;
   };
   function Board(){}
   Object.defineProperty(prototype, '$elm', {
@@ -10575,13 +10575,24 @@ Board = (function(){
     configurable: true,
     enumerable: true
   });
+  Object.defineProperty(prototype, 'lists', {
+    get: function(){
+      var this$ = this;
+      return filter(function(it){
+        return in$(this$.elm, it.$elm.parents());
+      })(
+      lists);
+    },
+    configurable: true,
+    enumerable: true
+  });
   Object.defineProperty(prototype, 'is_scrum', {
     get: function(){
       return any(function(it){
         var ref$;
         return (ref$ = it.type) === 'Idea' || ref$ === 'Plan' || ref$ === 'Current' || ref$ === 'Doing' || ref$ === 'Done';
       })(
-      lists);
+      this.lists);
     },
     configurable: true,
     enumerable: true
@@ -10600,11 +10611,16 @@ Board = (function(){
 }());
 Object.defineProperty(window, 'board', {
   get: function(){
-    return Board.instance();
+    return Board._instance;
   },
   configurable: true,
   enumerable: true
 });
+function in$(x, xs){
+  var i = -1, l = xs.length >>> 0;
+  while (++i < l) if (x === xs[i]) return true;
+  return false;
+}
 var Card;
 Card = (function(){
   Card.displayName = 'Card';
@@ -10738,16 +10754,13 @@ List = (function(){
   var prototype = List.prototype, constructor = List;
   List.selector = "div.list:not(.mod-add)";
   List.instanciate = function(){
-    var $lists, ref$, this$ = this;
+    var $lists, this$ = this;
     if (($lists = $(document).find(this.selector)).length > 0) {
       return each(function(it){
         return new constructor(it);
       })(
       $lists);
-    } else if (((ref$ = this.count_of_trying_instantiation) != null
-      ? ref$
-      : this.count_of_trying_instantiation = 0) < 10) {
-      this.count_of_trying_instantiation++;
+    } else {
       return setTimeout(function(){
         return this$.instanciate();
       }, 500);
@@ -10755,26 +10768,7 @@ List = (function(){
   };
   List.initialize = function(){
     this.instanciate();
-    this.be_observed();
     return this.listen();
-  };
-  List.be_observed = function(){
-    var this$ = this;
-    return board.observe({
-      childList: true
-    }, function(mutations){
-      return each(function(it){
-        return new constructor(it);
-      })(
-      flatten(
-      map(function(it){
-        return filter(function(it){
-          return it.className === "list";
-        })(
-        it.addedNodes);
-      })(
-      mutations)));
-    });
   };
   List.listen = function(){
     var this$ = this;
@@ -10795,9 +10789,10 @@ List = (function(){
   };
   function List(elm){
     this.elm = elm;
-    if (!this.already_exists) {
-      this.participate();
+    if (this.already_exists) {
+      return;
     }
+    this.participate();
     this.set_style();
     if (board.is_scrum) {
       this.format_header();
@@ -11031,11 +11026,18 @@ Main = {
     return Card.all();
   },
   execute: function(){
-    return this.initialize();
+    this.initialize();
+    this.set_interval();
+    return this.listen();
   },
   initialize: function(){
+    Board.initialize();
     Card.initialize();
     return List.initialize();
+  },
+  instanciate: function(){
+    Board.instanciate();
+    return List.instanciate();
   },
   on_keydown: function(key, cb){
     var this$ = this;
@@ -11044,8 +11046,36 @@ Main = {
         return cb();
       }
     });
+  },
+  set_interval: function(){
+    var this$ = this;
+    if (this._interval_id != null) {
+      return;
+    }
+    return function(it){
+      return this$._interval_id = it;
+    }(
+    setInterval(bind$(this, 'instanciate'), 2000));
+  },
+  clear_interval: function(){
+    var ref$;
+    clearInterval(this._interval_id);
+    return ref$ = this._interval_id, delete this._interval_id, ref$;
+  },
+  listen: function(){
+    var this$ = this;
+    return $(document).on('visibilitychange', function(){
+      switch (false) {
+      case !document.hidden:
+        return this$.clear_interval();
+      case !!document.hidden:
+        this$.instanciate();
+        return this$.set_interval();
+      }
+    });
   }
 };
-$(document).on("ready", function(){
-  return Main.execute();
-});
+Main.execute();
+function bind$(obj, key, target){
+  return function(){ return (target || obj)[key].apply(obj, arguments) };
+}

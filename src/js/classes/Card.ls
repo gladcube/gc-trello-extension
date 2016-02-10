@@ -2,7 +2,8 @@ class Card
   @is_initialized = no
   @selector = ".list-card"
   @current = null
-  @initialize = -> @listen!
+  @initialize = ->
+    @listen!
   @listen = ->
     $ document .on "mouseover", @selector, ({target})~>
       @current = new @@ ($ target .parents!.filter @selector).0
