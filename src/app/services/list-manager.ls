@@ -1,5 +1,5 @@
 require! \debounce
-{match_, unless_, case_, otherwise_, lazy, return_, $, act, may, Obj: {let_, get, set}} = require \glad-functions
+{dist, match_, unless_, case_, otherwise_, lazy, return_, $, act, may, Obj: {let_, get, set}} = require \glad-functions
 {outer_html, set_html, add_class, remove_class, parents, query, has_class, set_style, query_all} = require \domf
 {on_keydown} = require \./dom.ls
 {element: current_element} = require \./mouse-tracker.ls
@@ -40,7 +40,7 @@ module.exports = new class ListManager
   switch_header: switch_header = (|>) >> (`each` [name_elm >> hide, assist_elm >> show])
   revert_header: revert_header = (|>) >> (`each` [assist_elm >> hide, name_elm >> show])
   listen_header_clicked: listen_header_clicked =
-    act (|>) >> (map _, [
+    act (dist _, [
       editing_target_elm
       (lazy revert_header, _) >> debounce _, 150_ms
     ]) >> (act apply let_ _, \addEventListener, \click, _
@@ -53,18 +53,18 @@ module.exports = new class ListManager
     act switch_header
   ]
   description: description =
-    (|>) >> (map _, [type, period, time_resource]
+    (dist _, [type, period, time_resource]
     ) >> compact >> join "<br>"
   format: format =
-    act (|>) >> (map _, [description, assist_elm]
+    act (dist _, [description, assist_elm]
     ) >> (act apply set \innerHTML, _, _)
   sorted_cards: sorted_cards =
-    (|>) >> (map _, [
+    (dist _, [
       has_class \reversed
       cards >> (sort-by label_order)
     ]) >> apply (unless_ _, reverse, _)
   set_sorted_cards: set_sorted_cards =
-    act (|>) >> (map _, [
+    act (dist _, [
       sorted_cards >> (map outer_html) >> join ""
       cards_container_elm
     ]) >> apply set_html

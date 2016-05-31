@@ -5,7 +5,7 @@ y = 0
 module.exports = new class MouseTracker
   start: ->
     let_ document, \addEventListener, \mousemove,
-      (|>) >> (map _, [(get \pageX), (get \pageY)]
+      (dist _, [(get \pageX), (get \pageY)]
       ) >> apply memorize
   memorize: memorize = (_x, _y)->
     x := _x; y := _y
