@@ -1,4 +1,4 @@
-{Obj: {get, let_}} = require \glad-functions
+{dist, Obj: {get, let_}} = require \glad-functions
 x = 0
 y = 0
 
