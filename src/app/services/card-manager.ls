@@ -17,9 +17,10 @@ label_orders =
 module.exports = new class CardManager
   listen_i_key: listen_i_key = ->
     act on_keydown \i,
-      current_card >> may (
-        yank_id >> effect
-      )
+      except (get \target) >> (get \tagName) >> (in <[TEXTAREA INPUT]>),
+        current_card >> may (
+          yank_id >> effect
+        )
   current_card: current_card = ->
     current_element!
     |> parents
@@ -32,9 +33,7 @@ module.exports = new class CardManager
       act set_style \transition, "all 0.4s ease-in-out"
     ) >> set_style \background, \black
   uncolorize: uncolorize =
-    act (
-      act set_style \transition, ""
-    ) >> set_style \background, \white
+    act set_style \background, \white
   effect: effect = colorize >> (lazy uncolorize, _) >> (let_ global, \setTimeout _, 300_ms)
   cards: cards = (query \.list-cards) >> children
   label_color: label_color =

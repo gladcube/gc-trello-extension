@@ -1,6 +1,6 @@
 require! \debounce
-{dist, match_, unless_, case_, otherwise_, lazy, return_, $, act, may, Obj: {let_, get, set}} = require \glad-functions
-{outer_html, set_html, add_class, remove_class, parents, query, has_class, set_style, query_all} = require \domf
+{except, dist, match_, unless_, case_, otherwise_, lazy, return_, $, act, may, Obj: {let_, get, set}} = require \glad-functions
+{append_to, set_html, add_class, remove_class, parents, query, has_class, set_style, query_all} = require \domf
 {on_keydown} = require \./dom.ls
 {element: current_element} = require \./mouse-tracker.ls
 {cards, label_order} = require \./card-manager.ls
@@ -65,9 +65,9 @@ module.exports = new class ListManager
     ]) >> apply (unless_ _, reverse, _)
   set_sorted_cards: set_sorted_cards =
     act (dist _, [
-      sorted_cards >> (map outer_html) >> join ""
-      cards_container_elm
-    ]) >> apply set_html
+      append_to . cards_container_elm
+      sorted_cards >> reverse
+    ]) >> apply each _, _
   toggle: toggle =
     (
       case_ (has_class \reversed), remove_class \reversed
@@ -77,7 +77,8 @@ module.exports = new class ListManager
   sort: sort = set_sorted_cards >> toggle
   listen_o_key: listen_o_key = ->
     act on_keydown \o,
-      current_list >> may sort
+      except (get \target) >> (get \tagName) >> (is \TEXTAREA),
+        current_list >> may sort
   current_list: current_list = ->
     current_element!
     |> parents
