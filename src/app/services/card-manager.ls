@@ -1,4 +1,3 @@
-{find_map, match_, except, return_, lazy, may, act, Obj: {get, let_}} = require \glad-functions
 {classes, set_style, children, query, attr, parents, has_class} = require \domf
 {on_keydown} = require \./dom.ls
 {element: current_element} = require \./mouse-tracker.ls
@@ -26,7 +25,11 @@ module.exports = new class CardManager
     |> parents
     |> find has_class class_name
   title_elm: title_elm = query "a.list-card-title"
-  id: id = title_elm >> (attr \href) >> (match_ /\/c\/([^/]+)\//) >> (at 1)
+  id: id =
+    title_elm
+    >> (attr \href)
+    >> (match_ /\/c\/([^/]+)\//)
+    >> (at 1)
   yank_id: yank_id = act id >> yank
   colorize: colorize =
     act (
@@ -34,12 +37,17 @@ module.exports = new class CardManager
     ) >> set_style \background, \black
   uncolorize: uncolorize =
     act set_style \background, \white
-  effect: effect = colorize >> (lazy uncolorize, _) >> (let_ global, \setTimeout _, 300_ms)
-  cards: cards = (query \.list-cards) >> children
+  effect: effect =
+    colorize
+    >> (lazy uncolorize, _)
+    >> (let_ global, \setTimeout _, 300_ms)
+  cards: cards =
+    (query \.list-cards)
+    >> children
   label_color: label_color =
-    (query \.card-label) >> may (
-      classes >> find_map match_ /card-label-(\w+)/
-    ) >> may at 1
+    (query \.card-label)
+    >> (may classes >> find_map match_ /card-label-(\w+)/)
+    >> may at 1
   label_order: label_order =
     label_color >> (
       get _, label_orders

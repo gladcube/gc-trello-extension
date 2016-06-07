@@ -1,5 +1,4 @@
 {key_codes} = require \../configs/constants.ls
-{when_, Obj: {get, let_}} = require \glad-functions
 
 module.exports = new class Dom
   on_keydown: (key, cb)->

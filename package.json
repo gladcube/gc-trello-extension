@@ -16,8 +16,9 @@
     "debounce": "^1.0.0",
     "domf": "0.0.1",
     "envs-checker": "0.0.0",
-    "glad-functions": "0.0.14",
+    "glad-functions": "0.0.17",
     "glob": "^7.0.3",
+    "livescript": "^1.5.0",
     "prelude-ls": "^1.1.2"
   }
 }
